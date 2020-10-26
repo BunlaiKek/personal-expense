@@ -20,6 +20,12 @@ class MyHomePage extends StatelessWidget {
       title: 'New Shoes',
       amount: 69.99,
       date: DateTime.now(),
+    ),
+    Transaction(
+      id: 't2',
+      title: 'Weekly Groceries',
+      amount: 16.53,
+      date: DateTime.now(),
     )
   ];
   @override
@@ -30,7 +36,7 @@ class MyHomePage extends StatelessWidget {
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Container(
               width: double.infinity,
@@ -40,9 +46,40 @@ class MyHomePage extends StatelessWidget {
                 elevation: 5,
               ),
             ),
-            Card(
-              child: Text("LIST OF TX"),
-              color: Colors.red,
+            Column(
+              children: transactions.map((tx) {
+                return Card(
+                  child: Row(
+                    children: [
+                      Container(
+                        margin:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                        child: Text(
+                          tx.amount.toString(),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.purple),
+                        ),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.purple, width: 2)),
+                        padding: EdgeInsets.all(10),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tx.title,
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          Text(tx.date.toString())
+                        ],
+                      )
+                    ],
+                  ),
+                );
+              }).toList(),
             )
           ],
         ));
