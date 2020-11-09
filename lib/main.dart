@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import './widgets/chat.dart';
 import './widgets/transaction_list.dart';
 import './widgets/new_transaction.dart';
 import './models/transaction.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -16,11 +23,12 @@ class MyApp extends StatelessWidget {
           accentColor: Colors.amber,
           fontFamily: 'Quicksand',
           textTheme: ThemeData.light().textTheme.copyWith(
-                headline6: TextStyle(
-                    fontFamily: 'OpenSans',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
+              headline6: TextStyle(
+                  fontFamily: 'OpenSans',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              button:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           appBarTheme: AppBarTheme(
               textTheme: ThemeData.light().textTheme.copyWith(
                   headline6: TextStyle(
@@ -57,23 +65,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
-      return tx.date.isAfter(
-        DateTime.now().subtract(
-          Duration(days: 7),
-        )
-      );
+      return tx.date.isAfter(DateTime.now().subtract(
+        Duration(days: 7),
+      ));
     }).toList();
   }
 
-  void _addNewTransaction(String title, double amount) {
+  void _addNewTransaction(String title, double amount, DateTime chosenDate) {
     final newTx = Transaction(
         id: DateTime.now().toString(),
         title: title,
         amount: amount,
-        date: DateTime.now());
+        date: chosenDate);
 
     setState(() {
       _userTransactions.add(newTx);
+    });
+  }
+
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions.removeWhere((tx) => tx.id == id);
     });
   }
 
@@ -94,22 +106,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final appBar = AppBar(
+      title: Text('Personal Exspenses'),
+      actions: [
+        IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () => _startAddNewTransation(context))
+      ],
+    );
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Personal Exspenses'),
-        actions: [
-          IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () => _startAddNewTransation(context))
-        ],
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
             // mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Chart(_recentTransactions),
-              TransactionList(_userTransactions)
+              Container(
+                  height: (MediaQuery.of(context).size.height -
+                          appBar.preferredSize.height -
+                          MediaQuery.of(context).padding.top) *
+                      0.3,
+                  child: Chart(_recentTransactions)),
+              Container(
+                  height: (MediaQuery.of(context).size.height -
+                          appBar.preferredSize.height -
+                          MediaQuery.of(context).padding.top) *
+                      0.7,
+                  child: TransactionList(_userTransactions, _deleteTransaction))
             ]),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
