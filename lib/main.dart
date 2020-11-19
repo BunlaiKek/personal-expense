@@ -103,27 +103,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('build() MyHomePageState');
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final PreferredSizeWidget appBar = Platform.isIOS ? CupertinoNavigationBar(
-      middle: Text('Personal Exspenses'),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: () => _startAddNewTransation(context),
-            child: Icon(CupertinoIcons.add),
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text('Personal Exspenses'),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () => _startAddNewTransation(context),
+                  child: Icon(CupertinoIcons.add),
+                )
+              ],
+            ),
           )
-        ],
-      ),
-    ): AppBar(
-      title: Text('Personal Exspenses'),
-      actions: [
-        IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _startAddNewTransation(context))
-      ],
-    );
+        : AppBar(
+            title: Text('Personal Exspenses'),
+            actions: [
+              IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () => _startAddNewTransation(context))
+            ],
+          );
 
     final txListWidget = Container(
         height: (mediaQuery.size.height -
@@ -131,56 +134,63 @@ class _MyHomePageState extends State<MyHomePage> {
                 mediaQuery.padding.top) *
             0.7,
         child: TransactionList(_userTransactions, _deleteTransaction));
-    final pageBody = SingleChildScrollView(
-        child: Column(
-            // mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (isLandscape)
-                Row(
-                  children: [
-                    Text('Show Chart'),
-                    Switch.adaptive(
-                        activeColor: Theme.of(context).accentColor,
-                        value: this._showChart,
-                        onChanged: (val) {
-                          setState(() {
-                            this._showChart = val;
-                          });
-                        }),
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,
-                ),
-              if (!isLandscape)
-                Container(
-                    height: (mediaQuery.size.height -
-                            appBar.preferredSize.height -
-                            mediaQuery.padding.top) *
-                        0.3,
-                    child: Chart(_recentTransactions)),
-              if (!isLandscape) txListWidget,
-              if (isLandscape)
-                this._showChart
-                    ? Container(
-                        height: (mediaQuery.size.height -
-                                appBar.preferredSize.height -
-                                mediaQuery.padding.top) *
-                            0.7,
-                        child: Chart(_recentTransactions))
-                    : txListWidget
-            ]),
-      );
-    return Platform.isIOS ? CupertinoPageScaffold(
-      child: pageBody,
-      navigationBar: appBar,
-    ): Scaffold(
-      appBar: appBar,
-      body: pageBody,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Platform.isIOS ? Container() : FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => _startAddNewTransation(context),
-      ),
-    );
+    final pageBody = SafeArea(
+        child: SingleChildScrollView(
+      child: Column(
+          // mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (isLandscape)
+              Row(
+                children: [
+                  Text('Show Chart',
+                      style: Theme.of(context).textTheme.headline6),
+                  Switch.adaptive(
+                      activeColor: Theme.of(context).accentColor,
+                      value: this._showChart,
+                      onChanged: (val) {
+                        setState(() {
+                          this._showChart = val;
+                        });
+                      }),
+                ],
+                mainAxisAlignment: MainAxisAlignment.center,
+              ),
+            if (!isLandscape)
+              Container(
+                  height: (mediaQuery.size.height -
+                          appBar.preferredSize.height -
+                          mediaQuery.padding.top) *
+                      0.3,
+                  child: Chart(_recentTransactions)),
+            if (!isLandscape) txListWidget,
+            if (isLandscape)
+              this._showChart
+                  ? Container(
+                      height: (mediaQuery.size.height -
+                              appBar.preferredSize.height -
+                              mediaQuery.padding.top) *
+                          0.7,
+                      child: Chart(_recentTransactions))
+                  : txListWidget
+          ]),
+    ));
+    return Platform.isIOS
+        ? CupertinoPageScaffold(
+            child: pageBody,
+            navigationBar: appBar,
+          )
+        : Scaffold(
+            appBar: appBar,
+            body: pageBody,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () => _startAddNewTransation(context),
+                  ),
+          );
   }
 }
