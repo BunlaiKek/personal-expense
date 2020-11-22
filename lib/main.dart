@@ -86,6 +86,46 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  List<Widget> _buildLandscapeContent(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txListWidget) {
+    return [
+      Row(
+        children: [
+          Text('Show Chart'),
+          Switch(
+              value: this._showChart,
+              onChanged: (val) {
+                setState(() {
+                  this._showChart = val;
+                });
+              }),
+        ],
+        mainAxisAlignment: MainAxisAlignment.center,
+      ),
+      _showChart
+          ? Container(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.7,
+              child: Chart(_recentTransactions))
+          : txListWidget
+    ];
+  }
+
+  List<Widget> _buildPortraitContent(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txWidgetList) {
+    return [
+      Container(
+          height: (mediaQuery.size.height -
+                  appBar.preferredSize.height -
+                  mediaQuery.padding.top) *
+              0.3,
+          child: Chart(_recentTransactions)),
+      txWidgetList
+    ];
+  }
+
   void _startAddNewTransation(
     BuildContext ctx,
   ) {
