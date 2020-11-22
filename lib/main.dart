@@ -42,7 +42,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final List<Transaction> _userTransactions = [
     // Transaction(
     //   id: 't1',
@@ -59,6 +59,24 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   bool _showChart = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   List<Transaction> get _recentTransactions {
     return _userTransactions.where((tx) {
@@ -126,6 +144,54 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
   }
 
+  CupertinoNavigationBar _buildCupertinoNavigationBar() {
+    return CupertinoNavigationBar(
+      middle: Text('Personal Exspenses'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => _startAddNewTransation(context),
+            child: Icon(CupertinoIcons.add),
+          )
+        ],
+      ),
+    );
+  }
+
+  AppBar _buildMaterialAppBar() {
+    return AppBar(
+      title: Text('Personal Exspenses'),
+      actions: [
+        IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () => _startAddNewTransation(context))
+      ],
+    );
+  }
+
+  Scaffold _buildMaterialScaffold(AppBar appBar, SafeArea pageBody) {
+    return Scaffold(
+      appBar: appBar,
+      body: pageBody,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Platform.isIOS
+          ? Container()
+          : FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () => _startAddNewTransation(context),
+            ),
+    );
+  }
+
+  CupertinoPageScaffold _buildCupertinoPageScaffold(
+      SafeArea pageBody, CupertinoNavigationBar appBar) {
+    return CupertinoPageScaffold(
+      child: pageBody,
+      navigationBar: appBar,
+    );
+  }
+
   void _startAddNewTransation(
     BuildContext ctx,
   ) {
@@ -147,26 +213,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final mediaQuery = MediaQuery.of(context);
     final isLandscape = mediaQuery.orientation == Orientation.landscape;
     final PreferredSizeWidget appBar = Platform.isIOS
-        ? CupertinoNavigationBar(
-            middle: Text('Personal Exspenses'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () => _startAddNewTransation(context),
-                  child: Icon(CupertinoIcons.add),
-                )
-              ],
-            ),
-          )
-        : AppBar(
-            title: Text('Personal Exspenses'),
-            actions: [
-              IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () => _startAddNewTransation(context))
-            ],
-          );
+        ? _buildCupertinoNavigationBar()
+        : _buildMaterialAppBar();
 
     final txListWidget = Container(
         height: (mediaQuery.size.height -
@@ -187,21 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ]),
     ));
     return Platform.isIOS
-        ? CupertinoPageScaffold(
-            child: pageBody,
-            navigationBar: appBar,
-          )
-        : Scaffold(
-            appBar: appBar,
-            body: pageBody,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
-            floatingActionButton: Platform.isIOS
-                ? Container()
-                : FloatingActionButton(
-                    child: Icon(Icons.add),
-                    onPressed: () => _startAddNewTransation(context),
-                  ),
-          );
+        ? _buildCupertinoPageScaffold(pageBody, appBar)
+        : _buildMaterialScaffold(appBar, pageBody);
   }
 }
